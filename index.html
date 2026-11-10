@@ -867,7 +867,10 @@
     show();
   }
 
-  loadNotes().then(route);
+  // 過去問の参照(ネットで確認した年度・問番号)を各解説の「過去問」欄に足す(問題文は載せない)
+  const mergeRefs = () => { for (const [k, refs] of Object.entries(window.KAKOMON_REF || {})) { const n = (window.NOTES || {})[k]; if (!n) continue;
+    const have = new Set((n.kakomon || []).map(x => x.year + x.no)); n.kakomon = [...(n.kakomon || []), ...refs.filter(r => !have.has(r.year + r.no))]; } };
+  loadNotes().then(() => { mergeRefs(); route(); });
 })();
 </script>
 </body>
