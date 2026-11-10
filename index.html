@@ -92,6 +92,7 @@
   .fusen.on { background: #ffe066; color: #5a4600; }
   .fusen-memo { font-size: 13px; background: #fff6c8; border-left: 4px solid #e8b800; padding: 6px 10px; border-radius: 4px; margin: -4px 0 10px; }
   .fusen-row { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--sub); margin-top: 12px; }
+  .checked { background: #e6f4ea; color: #1e6b34; border-radius: 8px; padding: 6px 10px; font-size: 13px; margin-bottom: 10px; }
   .goro-item b { display: block; font-size: 16px; }
   .goro-item p { margin: 6px 0 0; color: var(--sub); font-size: 14px; white-space: pre-wrap; }
   .card > .goro-item + .goro-item, .card .goro-item { padding-top: 8px; }
@@ -200,6 +201,7 @@
 <script src="questions.js"></script>
 <script src="laws/_future.js"></script>
 <script src="notes/_basis.js"></script>
+<script src="notes/_checked.js"></script>
 <script>
 (() => {
   const KEY = "yuruhouritsu.v1";
@@ -493,7 +495,9 @@
 
   // 解説本体(条文の解説・テーマ解説で共通)
   function noteHtml(note) {
-    return `<div class="card sec">${note.status === "draft" ? `<div class="draft">下書き:チェック部門の確認前です</div>` : ""}${note.covers ? `<div class="warn" style="margin:0 0 10px">この解説は${esc(note.covers)}をまとめて説明しています。</div>` : ""}
+    const ckKey = Object.keys(window.NOTES || {}).find(k => window.NOTES[k] === note);
+    const ck = (window.NOTE_CHECKED || {})[ckKey];
+    return `<div class="card sec">${ck ? `<div class="checked">チェック部門で確認済み(${esc(ck)})</div>` : note.status === "draft" ? `<div class="draft">下書き:チェック部門の確認前です</div>` : ""}${note.covers ? `<div class="warn" style="margin:0 0 10px">この解説は${esc(note.covers)}をまとめて説明しています。</div>` : ""}
         <h3>ひとことで</h3><p>${esc(note.summary)}</p>${figs(note, "summary")}
         ${note.terms && note.terms.length ? `<h3>まず用語</h3>${note.terms.map(t => `<div class="term"><b>${esc(t.word)}</b><p>${esc(t.body)}</p>${t.fig ? figs({ figures: [{ ...t.fig, at: "x" }] }, "x") : ""}</div>`).join("")}${figs(note, "terms")}` : ""}
         ${note.why ? `<h3>なぜこのルールがあるの?</h3><p>${esc(note.why)}</p>${figs(note, "why")}` : ""}
