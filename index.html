@@ -94,6 +94,14 @@
   .fusen-row { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--sub); margin-top: 12px; }
   .stmts { background: #f6f3ec; border-radius: 10px; padding: 8px 12px; margin: 0 0 12px; }
   .stmts p { margin: 6px 0; font-size: 15px; line-height: 1.7; }
+  .theme-row { width: 100%; text-align: left; font: inherit; cursor: pointer; background: none; border: 0; border-top: 1px solid var(--line); color: inherit; }
+  .theme-row:disabled { opacity: .45; cursor: default; }
+  .trend-wrap { overflow-x: auto; padding: 8px; }
+  table.trend { border-collapse: collapse; font-size: 12px; min-width: 520px; width: 100%; }
+  table.trend th, table.trend td { border: 1px solid var(--line); padding: 4px 3px; text-align: center; }
+  table.trend tbody th { text-align: left; font-weight: 500; min-width: 120px; }
+  table.trend tr.tg th { background: var(--mark); font-weight: 700; }
+  table.trend td.hot { background: #fde2d2; font-weight: 700; } table.trend td.warm { background: #fbf3dc; }
   .checked { background: #e6f4ea; color: #1e6b34; border-radius: 8px; padding: 6px 10px; font-size: 13px; margin-bottom: 10px; }
   .goro-item b { display: block; font-size: 16px; }
   .goro-item p { margin: 6px 0 0; color: var(--sub); font-size: 14px; white-space: pre-wrap; }
@@ -204,6 +212,7 @@
 <script src="laws/_future.js"></script>
 <script src="notes/_basis.js"></script>
 <script src="notes/_checked.js"></script>
+<script src="trend.js"></script>
 <script>
 (() => {
   const KEY = "yuruhouritsu.v1";
@@ -310,6 +319,9 @@
     if (p[0] === "review") return quiz(dueQs(), "今日の復習");
     if (p[0] === "me") return meView();
     if (p[0] === "goro") return goroView(p[1], p[2]);
+    if (p[0] === "themes") return themesView(p[1]);
+    if (p[0] === "trend") return trendView(p[1]);
+    if (p[0] === "forecast") return forecastView();
     if (p[0] === "topic") return topicView(p[1]);
     if (p[0] === "mode") return modeQuiz(p[1]);
     if (p[0] === "tab" && EXAMS.some(e => e.key === p[1])) { curTab = p[1]; ls.set(TABKEY, curTab); }
@@ -355,6 +367,10 @@
     const byType = (t) => allQuestions().filter(q => (q.type || "ox") === t).length;
     h += `<h2>形式別に解く</h2><div class="modes" style="grid-template-columns:repeat(4,1fr)">${[["ox", "○×"], ["choice", "択一"], ["tashi", "多肢選択"], ["kijutsu", "記述式"]].map(([t, n]) => `<button class="btn primary" ${byType(t) ? `data-go="mode/${t}"` : "disabled"}>${n}<br><small>${byType(t)}問</small></button>`).join("")}</div>`;
     const examN = allQuestions().filter(q => q.level === "exam").length;
+    if (window.TREND && ex.key === "gyosei") h += `<h2>テーマ・傾向・予想</h2><div class="modes" style="grid-template-columns:repeat(3,1fr)">
+      <button class="btn primary" data-go="themes">テーマ別<br><small>に解く</small></button>
+      <button class="btn primary" data-go="trend">出題傾向<br><small>10年分</small></button>
+      <button class="btn primary" data-go="forecast">予想問題<br><small>次の試験</small></button></div>`;
     h += `<h2>本試験レベル</h2><div class="card"><p class="ttl">本試験と同じ形の問題${examN ? `<span class="badge">${examN}問</span>` : ""}</p>
       <div class="meta">5肢択一・ア〜オの組み合わせ・事例問題など、判例や条文の細かいところまで問う問題です。</div><div style="height:12px"></div>
       <button class="btn primary" ${examN ? `data-go="mode/exam"` : "disabled"}>本試験レベルを解く</button></div>`;
@@ -575,6 +591,66 @@
     if (b) b.onclick = () => quiz(note.questions.map(q => ({ ...q, src: `${law.title} ${a.title}`, checked: note.checked })), `${law.title} ${a.title}`);
     const be = document.getElementById("artExam");
     if (be) be.onclick = () => quiz(examQs.map(q => ({ ...q, level: "exam", src: `${law.title} ${a.title}` })), `${law.title} ${a.title}(本試験レベル)`);
+  }
+
+  // ---------- テーマ別・出題傾向・予想(trend.js) ----------
+  const shuffleQs = (a) => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+  function qsForUnits(units, examFirst) {
+    const out = [], seen = new Set();
+    const add = (q) => { if (!seen.has(q.id)) { seen.add(q.id); out.push(q); } };
+    for (const u of units) {
+      if (u.startsWith("topic:")) { const t = (window.TOPICS || {})[u.slice(6)]; (t && t.questions || []).forEach(q => add({ ...q, src: t.title, checked: t.checked })); continue; }
+      const n = noteFor(u), [law, num] = u.split(":"), lbl = `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`;
+      ((window.EXAMQ || {})[u] || []).forEach(q => add({ ...q, level: "exam", src: lbl }));
+      (n && n.questions || []).forEach(q => add({ ...q, src: lbl, checked: n.checked }));
+    }
+    if (!examFirst) return shuffleQs(out);
+    return [...shuffleQs(out.filter(q => q.level === "exam")), ...shuffleQs(out.filter(q => q.level !== "exam"))];
+  }
+  const subjTabs = (cur, base) => `<div class="modes" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">${TREND.subjects.map((sj, i) => `<button class="btn ${i === cur ? "primary" : "ghost"}" data-go="${base}/${i}" style="padding:8px 4px;font-size:13px">${esc(sj.name)}</button>`).join("")}</div>`;
+  function themesView(si) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    const i = +(si || 0), sj = TREND.subjects[i];
+    let h = `<div class="card"><p class="ttl">テーマ別に解く</p><div class="meta">本試験の出題テーマごとに、基本問題と本試験レベルの問題をまとめて解けます。</div></div>` + subjTabs(i, "themes");
+    let g = "";
+    sj.rows.forEach((r, ri) => {
+      const n = qsForUnits(r[3]).length;
+      if (r[0] !== g) { g = r[0]; h += `<h2>${esc(g)}</h2>`; }
+      h += `<button class="row theme-row" data-ri="${ri}" ${n ? "" : "disabled"}><span>${esc(r[1])}</span><span class="r">${n}問</span></button>`;
+    });
+    view.innerHTML = h; bindGo();
+    view.querySelectorAll(".theme-row").forEach(b => b.onclick = () => { const r = sj.rows[+b.dataset.ri]; quiz(qsForUnits(r[3]), `${sj.name} ${r[0]} › ${r[1]}`); });
+  }
+  function trendView(si) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    const i = +(si || 0), sj = TREND.subjects[i], Y = TREND.years;
+    const cell = (marks, y) => { const m = (marks.match(new RegExp(`(?:^| )${y}([○△多記]+)`)) || [])[1] || ""; return `<td class="tc ${m.includes("○") || m.includes("多") || m.includes("記") ? "hot" : m ? "warm" : ""}">${esc(m)}</td>`; };
+    let h = `<div class="card"><p class="ttl">出題傾向(平成28〜令和7年度)</p><div class="meta">○ そのテーマから出題 / △ 肢の一つ / 多 多肢選択式 / 記 記述式。市販の問題集の傾向表から読み取った出題実績を、このアプリのテーマに整理し直したものです(読み違いがある場合があります)。</div></div>` + subjTabs(i, "trend");
+    h += `<div class="card trend-wrap"><table class="trend"><thead><tr><th>テーマ</th>${Y.map(y => `<th>${esc(TREND.yearLabel[y])}</th>`).join("")}</tr></thead><tbody>`;
+    let g = "";
+    sj.rows.forEach(r => {
+      if (r[0] !== g) { g = r[0]; h += `<tr class="tg"><th colspan="${Y.length + 1}">${esc(g)}</th></tr>`; }
+      h += `<tr><th>${esc(r[1])}</th>${Y.map(y => cell(r[2], y)).join("")}</tr>`;
+    });
+    h += `</tbody></table></div>`;
+    (sj.extra || []).forEach(e => h += `<div class="card"><p class="ttl" style="font-size:15px">${esc(e[0])}</p><p class="meta" style="line-height:1.8">${esc(e[1])}</p></div>`);
+    h += `<button class="btn primary" data-go="forecast">次の試験の予想を見る</button>`;
+    view.innerHTML = h; bindGo();
+  }
+  function forecastView() {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    const all = TREND.subjects.flatMap(sj => (sj.forecast || []).flatMap(f => f.units));
+    const allN = qsForUnits(all).length;
+    let h = `<div class="card"><p class="ttl">次の試験(令和9年度)の予想</p><div class="meta">直近10年の出題傾向から、ゆみが分析した予想です。よく出るテーマと、しばらく出ていない重要テーマを中心に選んでいます。予想は外れることもあるので、全範囲の学習と合わせて使ってください。</div><div style="height:12px"></div>
+      <button class="btn primary" id="fcAll" ${allN ? "" : "disabled"}>予想問題をまとめて解く(${allN}問)</button></div>`;
+    const list = [];
+    TREND.subjects.forEach(sj => { if (!(sj.forecast || []).length) return; h += `<h2>${esc(sj.name)}</h2>`;
+      sj.forecast.forEach(f => { const k = list.push(f) - 1, n = qsForUnits(f.units).length;
+        h += `<div class="card"><p class="ttl" style="font-size:16px">${esc(f.title)}</p><p class="meta" style="line-height:1.8">${esc(f.why)}</p>
+          <button class="btn ghost fc" data-k="${k}" ${n ? "" : "disabled"} style="margin-top:8px">このテーマの予想問題(${n}問)</button></div>`; }); });
+    view.innerHTML = h;
+    document.getElementById("fcAll").onclick = () => quiz(qsForUnits(all, true), "予想問題");
+    view.querySelectorAll(".fc").forEach(b => b.onclick = () => { const f = list[+b.dataset.k]; quiz(qsForUnits(f.units, true), `予想問題 › ${f.title}`); });
   }
 
   // ---------- ゴロ帳(自分で考えた語呂合わせ。この端末の中だけに保存) ----------
