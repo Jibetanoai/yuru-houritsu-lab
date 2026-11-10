@@ -284,7 +284,8 @@
     for (const [id, t] of Object.entries(window.TOPICS || {})) (t.questions || []).forEach(q => qs.push({ ...q, from: t.title, src: t.title, checked: t.checked }));
     for (const [k, arr] of Object.entries(window.EXAMQ || {})) {
       const [law, num] = k.split(":");
-      arr.forEach(q => qs.push({ ...q, level: "exam", from: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, src: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条` }));
+      const lbl = law === "topic" ? ((window.TOPICS || {})[num] || {}).title || "テーマ" : `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`;
+      arr.forEach(q => qs.push({ ...q, level: "exam", from: lbl, src: lbl }));
     }
     const seen = new Set();
     return qs.filter(q => !seen.has(q.id) && seen.add(q.id));
@@ -548,8 +549,12 @@
     if (!t) { view.innerHTML = `<div class="card">テーマが見つかりませんでした。</div>`; return; }
     view.innerHTML = `<div class="card"><div class="meta">テーマ解説 ／ ${esc(t.subjects.join("・"))}</div><p class="art-head" style="font-size:20px">${esc(t.title)}</p></div>
       ${noteHtml(t)}${t.questions && t.questions.length ? `<button class="btn primary" id="artQuiz">このテーマの問題を解く(${t.questions.length}問)</button>` : ""}`;
+    const examQs = (window.EXAMQ || {})[`topic:${id}`] || [];
+    if (examQs.length) view.insertAdjacentHTML("beforeend", `<button class="btn primary" id="artExam" style="margin-top:8px">本試験レベルの問題(${examQs.length}問)</button>`);
     const b = document.getElementById("artQuiz");
     if (b) b.onclick = () => quiz(t.questions.map(q => ({ ...q, src: t.title, checked: t.checked })), t.title);
+    const be = document.getElementById("artExam");
+    if (be) be.onclick = () => quiz(examQs.map(q => ({ ...q, level: "exam", src: t.title })), `${t.title}(本試験レベル)`);
   }
 
   async function articleView(k, num) {
@@ -599,7 +604,7 @@
     const out = [], seen = new Set();
     const add = (q) => { if (!seen.has(q.id)) { seen.add(q.id); out.push(q); } };
     for (const u of units) {
-      if (u.startsWith("topic:")) { const t = (window.TOPICS || {})[u.slice(6)]; (t && t.questions || []).forEach(q => add({ ...q, src: t.title, checked: t.checked })); continue; }
+      if (u.startsWith("topic:")) { const t = (window.TOPICS || {})[u.slice(6)]; ((window.EXAMQ || {})[u] || []).forEach(q => add({ ...q, level: "exam", src: t ? t.title : "" })); (t && t.questions || []).forEach(q => add({ ...q, src: t.title, checked: t.checked })); continue; }
       const n = noteFor(u), [law, num] = u.split(":"), lbl = `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`;
       ((window.EXAMQ || {})[u] || []).forEach(q => add({ ...q, level: "exam", src: lbl }));
       (n && n.questions || []).forEach(q => add({ ...q, src: lbl, checked: n.checked }));
