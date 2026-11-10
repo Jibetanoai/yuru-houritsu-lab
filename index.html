@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ゆる法律ラボ</title>
+<style>
+  :root {
+    --bg: #faf6ee; --card: #ffffff; --ink: #121c3d; --sub: #6b7080;
+    --line: #e4ded2; --accent: #d9292e; --ok: #1f8a5b; --ng: #d9292e;
+    --mark: #fff0a8; --soft: #eef3fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: .02em; cursor: pointer; }
+  .link { background: none; border: 0; color: var(--sub); font-size: 13px; cursor: pointer; padding: 4px; font-family: inherit; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #ece6da; padding: 4px; border-radius: 12px; margin-bottom: 16px; }
+  .tabs button { border: 0; background: transparent; padding: 10px 0; border-radius: 9px; font-size: 15px; font-weight: 700; color: var(--sub); cursor: pointer; font-family: inherit; }
+  .tabs button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  h2 { font-size: 13px; color: var(--sub); font-weight: 700; margin: 20px 4px 8px; letter-spacing: .05em; }
+  .ttl { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
+  .meta { color: var(--sub); font-size: 13px; line-height: 1.6; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 2px; border-top: 1px solid var(--line); cursor: pointer; }
+  .row:first-of-type { border-top: 0; }
+  .row.off { cursor: default; opacity: .5; }
+  .row .r { color: var(--sub); font-size: 13px; white-space: nowrap; }
+  .tag { display: inline-block; font-size: 11px; border-radius: 99px; padding: 1px 8px; margin-left: 4px; vertical-align: 1px; }
+  .tag.pv { background: var(--mark); color: #6b5300; }
+  .tag.nt { background: var(--ink); color: #fff; }
+  .tag.soon { background: #ece6da; color: var(--sub); }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 12px 0 14px; }
+  .bar > i { display: block; height: 100%; background: var(--ink); width: 0; transition: width .3s; }
+  .btn { display: block; width: 100%; border: 0; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; text-decoration: none; }
+  .btn.primary { background: var(--ink); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); margin-top: 10px; }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .tools input[type=search] { flex: 1 1 200px; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 15px; font-family: inherit; background: var(--card); }
+  .tools label { font-size: 13px; color: var(--sub); display: flex; gap: 4px; align-items: center; }
+  .chap { font-size: 12px; color: var(--sub); margin: 14px 2px 4px; font-weight: 700; }
+  .art-head { font-size: 22px; font-weight: 800; margin: 0; }
+  .art-cap { color: var(--sub); margin: 2px 0 0; }
+  .para { display: flex; gap: 10px; line-height: 1.9; margin: 12px 0; }
+  .para .pn { flex: 0 0 1.4em; color: var(--sub); font-weight: 700; }
+  .proviso { background: linear-gradient(transparent 55%, var(--mark) 55%); }
+  .items { list-style: none; padding: 0; margin: 4px 0 0; }
+  .items li { margin: 4px 0; }
+  .items .in { color: var(--sub); margin-right: 6px; }
+  .legend { font-size: 12px; color: var(--sub); }
+  .sec { margin-top: 6px; }
+  .sec h3 { font-size: 15px; margin: 0 0 8px; }
+  .sec p { line-height: 1.8; margin: 0 0 10px; }
+  .pv-box { background: #fffaf0; border-left: 4px solid #e8b800; padding: 10px 12px; border-radius: 6px; margin-bottom: 10px; }
+  .rel { display: block; padding: 10px 0; border-top: 1px solid var(--line); color: inherit; text-decoration: none; }
+  .rel b { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .traps li { line-height: 1.8; margin-bottom: 4px; }
+  .draft { font-size: 12px; background: #fdeaea; color: var(--ng); padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; }
+  .qno { font-size: 13px; color: var(--sub); margin-bottom: 10px; }
+  .qtext { font-size: 18px; line-height: 1.7; margin: 0 0 20px; }
+  .ox { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ox button { font-size: 40px; font-weight: 700; padding: 12px 0; border-radius: 14px; cursor: pointer; background: var(--card); border: 2px solid var(--line); color: var(--ink); font-family: inherit; }
+  .result { border-radius: 14px; padding: 16px; margin-top: 16px; }
+  .result.ok { background: #e7f5ee; } .result.ng { background: #fdeaea; }
+  .result b { font-size: 18px; } .result.ok b { color: var(--ok); } .result.ng b { color: var(--ng); }
+  .exp { line-height: 1.75; margin: 8px 0 10px; }
+  .src { font-size: 12px; color: var(--sub); line-height: 1.6; }
+  .score { font-size: 48px; font-weight: 800; text-align: center; margin: 6px 0 0; }
+  .score small { font-size: 18px; color: var(--sub); }
+  .center { text-align: center; }
+  .wrong-list { padding-left: 1.2em; line-height: 1.7; font-size: 14px; }
+  .badge { display: inline-block; background: var(--accent); color: #fff; border-radius: 99px; font-size: 12px; padding: 2px 9px; margin-left: 6px; }
+  .warn { font-size: 13px; background: #fff4e0; color: #8a5300; padding: 8px 12px; border-radius: 8px; margin: 10px 0 0; line-height: 1.6; }
+  .warn.red { background: #fdeaea; color: var(--ng); margin: 0 0 10px; }
+  .tag.fu { background: #fff4e0; color: #8a5300; }
+  .star { background: none; border: 0; font-size: 22px; cursor: pointer; color: #c9c2b2; padding: 0 4px; line-height: 1; }
+  .star.on { color: #e8b800; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+  .stats b { display: block; font-size: 26px; }
+  .stats span { font-size: 12px; color: var(--sub); }
+  .count { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .count b { font-size: 28px; }
+  .count input { font: inherit; font-size: 13px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 8px; }
+  .fusen { border: 1.5px solid #e8b800; background: transparent; color: #8a6d00; border-radius: 6px; font-size: 12px; font-weight: 700; padding: 3px 8px; cursor: pointer; font-family: inherit; }
+  .fusen.on { background: #ffe066; color: #5a4600; }
+  .fusen-memo { font-size: 13px; background: #fff6c8; border-left: 4px solid #e8b800; padding: 6px 10px; border-radius: 4px; margin: -4px 0 10px; }
+  .fusen-row { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--sub); margin-top: 12px; }
+  .goro-item b { display: block; font-size: 16px; }
+  .goro-item p { margin: 6px 0 0; color: var(--sub); font-size: 14px; white-space: pre-wrap; }
+  .card > .goro-item + .goro-item, .card .goro-item { padding-top: 8px; }
+  .goro-foot { display: flex; justify-content: space-between; margin-top: 8px; }
+  .goro-big { font-size: 22px; font-weight: 700; margin: 18px 0; white-space: pre-wrap; }
+  .goro-back { background: var(--mark); border-radius: 10px; padding: 12px; white-space: pre-wrap; }
+  .fusen-input { width: 100%; margin-top: 6px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; }
+  .choices { display: grid; gap: 8px; }
+  .choices button { display: flex; gap: 10px; text-align: left; background: var(--card); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; line-height: 1.6; cursor: pointer; color: var(--ink); }
+  .choices button span { flex: 0 0 1.6em; height: 1.6em; border-radius: 50%; background: var(--ink); color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .choices button.right { border-color: var(--ok); background: #e7f5ee; } .choices button.miss { border-color: var(--ng); background: #fdeaea; }
+  .tashi-text { line-height: 2.1; }
+  .blank { display: inline-block; min-width: 2.4em; text-align: center; border-bottom: 2px solid var(--ink); font-weight: 700; padding: 0 4px; margin: 0 2px; background: var(--soft); }
+  .blank.right { background: #e7f5ee; } .blank.miss { background: #fdeaea; }
+  .blank-sel { display: grid; gap: 8px; }
+  .blank-sel label { display: flex; gap: 8px; align-items: center; border-radius: 8px; padding: 4px; }
+  .blank-sel label.right { background: #e7f5ee; } .blank-sel label.miss { background: #fdeaea; }
+  .blank-sel b { flex: 0 0 1.5em; text-align: center; }
+  .blank-sel select { flex: 1; font: inherit; font-size: 15px; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); }
+  .kj { width: 100%; font: inherit; font-size: 16px; line-height: 1.7; padding: 10px; border: 1.5px solid var(--line); border-radius: 10px; resize: vertical; }
+  .kj-count { text-align: right; font-size: 13px; color: var(--sub); } .kj-count.over { color: var(--ng); font-weight: 700; }
+  .kj-res { background: var(--soft); }
+  .kj-model { font-size: 16px; line-height: 1.8; background: var(--card); padding: 10px; border-radius: 8px; margin: 4px 0 12px; }
+  .kj-pts { padding-left: 0; list-style: none; margin: 4px 0 8px; } .kj-pts li { padding: 3px 0; color: var(--sub); } .kj-pts li.hit { color: var(--ok); font-weight: 700; }
+  .self { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--sub); }
+  .self button { flex: 1; padding: 10px 4px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--card); font: inherit; font-weight: 700; cursor: pointer; }
+  .term { border-left: 4px solid var(--ink); padding: 2px 0 2px 12px; margin: 0 0 14px; }
+  .term b { font-size: 16px; }
+  .term p { margin: 4px 0 8px !important; }
+  .story { counter-reset: st; list-style: none; padding: 0; margin: 4px 0 14px; }
+  .story li { position: relative; padding: 0 0 12px 40px; border-left: 2px solid var(--line); margin-left: 13px; }
+  .story li:last-child { border-left-color: transparent; }
+  .story li::before { counter-increment: st; content: counter(st); position: absolute; left: -14px; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .story b { display: block; margin-bottom: 2px; }
+  .story span { line-height: 1.75; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .modes .btn { padding: 12px 4px; font-size: 14px; }
+  /* 図 */
+  .fig { margin: 4px 0 16px; padding: 14px 12px 10px; background: var(--soft); border-radius: 12px; }
+  .fig figcaption { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .fig-note { font-size: 12px; color: var(--sub); line-height: 1.6; margin: 8px 0 0 !important; }
+  .flow { display: flex; flex-direction: column; align-items: stretch; }
+  .flow-step { background: var(--card); border: 1.5px solid var(--ink); border-radius: 10px; padding: 9px 12px; text-align: center; }
+  .flow-step b { display: block; font-size: 15px; }
+  .flow-step span { display: block; font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .flow-step.hl { background: var(--mark); }
+  .flow-arrow { position: relative; height: 34px; display: flex; align-items: center; justify-content: center; }
+  .flow-arrow::before { content: ""; position: absolute; left: 50%; top: 2px; bottom: 9px; border-left: 2px solid var(--ink); }
+  .flow-arrow::after { content: ""; position: absolute; left: calc(50% - 6px); bottom: 2px; border: 6px solid transparent; border-top: 8px solid var(--ink); border-bottom: 0; }
+  .flow-arrow span { position: absolute; left: calc(50% + 12px); right: 0; font-size: 12px; color: var(--accent); font-weight: 700; line-height: 1.3; }
+  .tl { width: 100%; height: auto; display: block; }
+  .tl text { font-family: inherit; fill: var(--ink); }
+  .tl-span { font-size: 12px; font-weight: 700; }
+  .tl-pt { font-size: 11.5px; }
+  .tl-pt.hl { fill: var(--accent) !important; font-weight: 700; }
+  .tl-bar { fill: #c9d6ee; } .tl-hl { fill: var(--mark); stroke: #e8b800; }
+  .tl-axis { stroke: var(--ink); stroke-width: 2; } .tl-guide { stroke: var(--sub); stroke-width: 1; stroke-dasharray: 2 2; }
+  .gn rect { fill: var(--card); stroke: var(--ink); stroke-width: 1.5; }
+  .gn-thing rect { fill: #e9e1cf; stroke: #8a7a55; }
+  .gn.hl rect { fill: var(--mark); }
+  .gt { font-size: 14.5px; font-weight: 700; }
+  .gs { font-size: 11.5px; fill: var(--sub) !important; }
+  .ge { stroke: var(--ink); stroke-width: 1.6; }
+  .ge-right { stroke-dasharray: 5 3; }
+  .ge-hl { stroke: var(--accent); stroke-width: 2.4; }
+  .gm-e { fill: var(--ink); } .gm-hl { fill: var(--accent); }
+  .gl { font-size: 12.5px; font-weight: 700; paint-order: stroke; stroke: var(--soft); stroke-width: 4px; stroke-linejoin: round; }
+  .gl.hl { fill: var(--accent) !important; }
+  .cmp-wrap { overflow-x: auto; }
+  .cmp-cards { display: grid; gap: 8px; }
+  .cmp-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; line-height: 1.6; }
+  .cmp-card.hl { background: #fff8d6; border-color: #e8c94a; }
+  .cmp-card b { display: block; font-size: 14.5px; margin-bottom: 4px; }
+  .cmp-card div { display: flex; gap: 8px; }
+  .cmp-card div span { flex: 0 0 4.5em; color: var(--sub); font-size: 12px; padding-top: 2px; }
+  .dec-q { background: var(--card); border: 1.5px solid var(--ink); border-radius: 10px; padding: 9px 12px; font-weight: 700; text-align: center; }
+  .dec-a { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 6px; }
+  .dec-a > div { border-radius: 8px; padding: 7px 10px; font-size: 13.5px; line-height: 1.5; }
+  .dec-a small { display: inline-block; font-weight: 700; font-size: 11px; border-radius: 4px; padding: 0 6px; margin-right: 6px; }
+  .dec-yes { background: #e7f5ee; } .dec-yes small { background: var(--ok); color: #fff; }
+  .dec-no { background: #fdeaea; } .dec-no small { background: var(--ng); color: #fff; }
+  .cmp { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--card); }
+  .cmp th, .cmp td { border: 1px solid var(--line); padding: 7px 6px; text-align: left; vertical-align: top; line-height: 1.5; }
+  .cmp thead th { background: var(--ink); color: #fff; font-size: 12px; }
+  .cmp tr.hl th, .cmp tr.hl td { background: var(--mark); }
+  footer { color: var(--sub); font-size: 11px; line-height: 1.7; margin-top: 28px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="logo">ゆる法律ラボ</h1>
+    <span><button class="link hidden" id="backBtn">← もどる</button><button class="link" id="meBtn">記録</button></span>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <section id="view"></section>
+  <footer>
+    ※条文はe-Gov法令検索(法令API)から取得したものです。取得日以降の法改正は反映されていない場合があります。<br>
+    ※試験の日程・基準は年度によって変わります。最新情報は各試験の公式サイトで確認してください。<br>
+    ※学習用の教材です。個別の法律相談には対応していません。記録はこの端末の中だけに保存されます。
+  </footer>
+</main>
+
+<script src="exams.js"></script>
+<script src="questions.js"></script>
+<script src="laws/_future.js"></script>
+<script src="notes/_basis.js"></script>
+<script>
+(() => {
+  const KEY = "yuruhouritsu.v1";
+  const TABKEY = "yuruhouritsu.tab";
+  const DAY = 86400000;
+  const INTERVALS = [1, 3, 7, 14, 30];
+  const ls = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  let store = (() => { try { return JSON.parse(ls.get(KEY)) || {}; } catch { return {}; } })();
+  const save = () => ls.set(KEY, JSON.stringify(store));
+  const jget = (k, d) => { try { return JSON.parse(ls.get(k)) || d; } catch { return d; } };
+  let log = jget("yuruhouritsu.log", {});        // { "2026-11-09": 解いた数 }
+  let bm = jget("yuruhouritsu.bm", { arts: [], qs: [], memo: {} }); // 付箋(条文の★と問題の付箋・メモ)
+  bm.memo = bm.memo || {};
+  let goal = jget("yuruhouritsu.goal", {});       // { gyosei: "2027-11-14" }
+  let goro = jget("yuruhouritsu.goro", []);       // ゴロ帳 [{id, text, meaning, ref, created, updated}]
+  const saveGoro = () => ls.set("yuruhouritsu.goro", JSON.stringify(goro));
+  const saveAll = () => { ls.set("yuruhouritsu.log", JSON.stringify(log)); ls.set("yuruhouritsu.bm", JSON.stringify(bm)); ls.set("yuruhouritsu.goal", JSON.stringify(goal)); };
+  const ymd = (t) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  // 試験日の目安(公式発表前は例年の日程からの推定。タブごとに自分で変えられる)
+  const GOAL_DEFAULT = { gyosei: "2027-11-14" };
+  function streak() {
+    let n = 0, t = today();
+    if (!log[ymd(t)]) t -= DAY; // 今日まだ解いていなくても、昨日まで続いていれば数える
+    while (log[ymd(t)]) { n++; t -= DAY; }
+    return n;
+  }
+  function toggleBm(kind, id) {
+    const a = bm[kind]; const i = a.indexOf(id);
+    i >= 0 ? a.splice(i, 1) : a.push(id);
+    saveAll(); return i < 0;
+  }
+  const FUTURE = window.LAW_FUTURE || {};
+  // 解説を探す(まとめ解説は NOTE_ALIAS で別の条からも開ける)
+  const noteFor = (key) => (window.NOTES || {})[key] || (window.NOTES || {})[(window.NOTE_ALIAS || {})[key]];
+  const hasNote = (key) => !!noteFor(key);
+  const BASIS = window.NOTE_BASIS || {};
+  const esc = (t) => String(t ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const view = document.getElementById("view");
+  const tabsEl = document.getElementById("tabs");
+  const backBtn = document.getElementById("backBtn");
+  backBtn.onclick = () => history.length > 1 ? history.back() : go("");
+  document.getElementById("logo").onclick = () => go("");
+  document.getElementById("meBtn").onclick = () => go("me");
+
+  // ---------- データ読み込み(法律ごとのファイルを必要なときだけ読む) ----------
+  const loaded = {};
+  function loadScript(src) {
+    if (!loaded[src]) loaded[src] = new Promise((ok) => {
+      const s = document.createElement("script");
+      s.src = src; s.onload = () => ok(true); s.onerror = () => ok(false);
+      document.head.appendChild(s);
+    });
+    return loaded[src];
+  }
+  const loadLaw = (k) => loadScript(`laws/${k}.js`).then(() => (window.LAWDATA || {})[k]);
+  const loadNotes = () => Promise.all([...AVAILABLE_NOTES.map(k => loadScript(`notes/${k}.js`)), ...(window.AVAILABLE_TOPICS || []).map(k => loadScript(`topics/${k}.js`))]);
+
+  // 復習の対象になる全問題(講座の問題 + 条文解説の問題)
+  function allQuestions() {
+    const qs = LESSONS.flatMap(l => l.questions.map(q => ({ ...q, from: l.title })));
+    for (const [k, n] of Object.entries(window.NOTES || {})) {
+      const [law, num] = k.split(":");
+      (n.questions || []).forEach(q => qs.push({ ...q, from: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, src: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, checked: n.checked }));
+    }
+    for (const [id, t] of Object.entries(window.TOPICS || {})) (t.questions || []).forEach(q => qs.push({ ...q, from: t.title, src: t.title, checked: t.checked }));
+    const seen = new Set();
+    return qs.filter(q => !seen.has(q.id) && seen.add(q.id));
+  }
+  const dueQs = () => allQuestions().filter(q => store[q.id] && store[q.id].due <= today());
+  function record(q, ok) {
+    const s = store[q.id] || { box: 0, due: 0, tries: 0, correct: 0 };
+    s.tries++;
+    if (ok) { s.correct++; s.box = Math.min(s.box + 1, INTERVALS.length); s.due = today() + INTERVALS[s.box - 1] * DAY; }
+    else { s.box = 0; s.due = today(); }
+    store[q.id] = s; save();
+    const d = ymd(Date.now()); log[d] = (log[d] || 0) + 1; saveAll();
+  }
+
+  // ---------- 画面の切り替え(#/tab/xxx, #/law/xxx, #/art/xxx/18, #/quiz/...) ----------
+  const go = (h) => { location.hash = h ? "#/" + h : ""; };
+  window.addEventListener("hashchange", route);
+  let curTab = ls.get(TABKEY) || "gyosei";
+
+  function renderTabs(show) {
+    tabsEl.classList.toggle("hidden", !show);
+    tabsEl.innerHTML = EXAMS.map(e => `<button class="${e.key === curTab ? "on" : ""}" data-t="${e.key}">${esc(e.name)}</button>`).join("");
+    tabsEl.querySelectorAll("button").forEach(b => b.onclick = () => { curTab = b.dataset.t; ls.set(TABKEY, curTab); go("tab/" + curTab); });
+  }
+
+  async function route() {
+    const p = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
+    window.scrollTo(0, 0);
+    if (p[0] === "law") return lawView(p[1]);
+    if (p[0] === "art") return articleView(p[1], p[2]);
+    if (p[0] === "lesson") return startLesson(p[1]);
+    if (p[0] === "review") return quiz(dueQs(), "今日の復習");
+    if (p[0] === "me") return meView();
+    if (p[0] === "goro") return goroView(p[1], p[2]);
+    if (p[0] === "topic") return topicView(p[1]);
+    if (p[0] === "mode") return modeQuiz(p[1]);
+    if (p[0] === "tab" && EXAMS.some(e => e.key === p[1])) { curTab = p[1]; ls.set(TABKEY, curTab); }
+    return home();
+  }
+
+  // ---------- ホーム(タブ) ----------
+  function home() {
+    backBtn.classList.add("hidden");
+    renderTabs(true);
+    const ex = EXAMS.find(e => e.key === curTab);
+    const due = dueQs().length;
+    let h = "";
+    if (ex.note) h += `<p class="meta" style="margin:0 4px 8px">${esc(ex.note)}</p>`;
+    const g = goal[ex.key] || GOAL_DEFAULT[ex.key] || "";
+    const left = g ? Math.ceil((new Date(g + "T00:00:00") - today()) / DAY) : null;
+    h += `<div class="card count"><div><div class="meta">試験まで${!goal[ex.key] && GOAL_DEFAULT[ex.key] ? "(例年の日程からの目安・未発表)" : ""}</div>
+      <b>${left !== null ? (left >= 0 ? `あと ${left}日` : "試験日を過ぎました") : "試験日を設定"}</b>
+      <div class="meta">連続 ${streak()}日 ／ 今日 ${log[ymd(Date.now())] || 0}問</div></div>
+      <input type="date" id="goal" value="${esc(g)}" aria-label="試験日"></div>`;
+    const lessons = LESSONS.filter(l => ex.lessons.includes(l.id));
+    if (lessons.length) {
+      h += `<h2>講座(動画と連動)</h2>`;
+      h += lessons.map(l => {
+        const right = l.questions.filter(q => store[q.id] && store[q.id].box > 0).length;
+        return `<div class="card"><p class="ttl">${esc(l.title)}</p>
+          <div class="meta">${l.questions.length}問 ／ 覚えた ${right}問</div>
+          <div class="bar"><i style="width:${Math.round(right / l.questions.length * 100)}%"></i></div>
+          <button class="btn primary" data-go="lesson/${l.id}">解く</button>
+          ${l.video ? `<a class="btn ghost" href="${esc(l.video)}" target="_blank" rel="noopener">動画を見る</a>` : ""}</div>`;
+      }).join("");
+    }
+    h += `<h2>科目別・条文解説</h2>`;
+    h += ex.subjects.map(s => `<div class="card"><p class="ttl">${esc(s.name)}</p>${s.laws.map(k => {
+      const ok = AVAILABLE_LAWS.includes(k);
+      const notes = [...Object.keys(window.NOTES || {}), ...Object.keys(window.NOTE_ALIAS || {})].filter(x => x.startsWith(k + ":")).length;
+      return `<div class="row ${ok ? "" : "off"}" ${ok ? `data-go="law/${k}"` : ""}>
+        <span>${esc(LAW_NAMES[k])}${notes ? `<span class="tag nt">解説 ${notes}条</span>` : ""}</span>
+        <span class="r">${ok ? "条文を見る ›" : `<span class="tag soon">準備中</span>`}</span></div>`;
+    }).join("")}${Object.entries(window.TOPICS || {}).filter(([, t]) => t.subjects.includes(s.name)).map(([id, t]) => `<div class="row" data-go="topic/${id}"><span>${esc(t.title)}<span class="tag nt">テーマ</span></span><span class="r">›</span></div>`).join("")}${!s.laws.length && !Object.values(window.TOPICS || {}).some(t => t.subjects.includes(s.name)) ? `<p class="meta">解説は準備中です。</p>` : ""}</div>`).join("");
+    const wrongN = allQuestions().filter(q => store[q.id] && store[q.id].tries > store[q.id].correct).length;
+    const fusenN = allQuestions().filter(q => bm.qs.includes(q.id)).length;
+    const byType = (t) => allQuestions().filter(q => (q.type || "ox") === t).length;
+    h += `<h2>形式別に解く</h2><div class="modes" style="grid-template-columns:repeat(4,1fr)">${[["ox", "○×"], ["choice", "択一"], ["tashi", "多肢選択"], ["kijutsu", "記述式"]].map(([t, n]) => `<button class="btn primary" ${byType(t) ? `data-go="mode/${t}"` : "disabled"}>${n}<br><small>${byType(t)}問</small></button>`).join("")}</div>`;
+    h += `<h2>苦手つぶし</h2><div class="modes" style="grid-template-columns:1fr 1fr">
+      <button class="btn primary" ${wrongN ? `data-go="mode/wrong"` : "disabled"}>間違えた問題<br><small>${wrongN}問</small></button>
+      <button class="btn primary" ${fusenN ? `data-go="mode/star"` : "disabled"}>付箋の問題<br><small>${fusenN}問</small></button></div>`;
+    h += `<h2>ゴロ帳</h2><div class="card"><p class="ttl">自分で考えたゴロ${goro.length ? `<span class="badge">${goro.length}件</span>` : ""}</p>
+      <div class="meta">覚え方を自分の言葉でメモして、カードでくり返し確認できます(3つのタブ共通)。</div><div style="height:12px"></div>
+      <div class="modes" style="grid-template-columns:1fr 1fr"><button class="btn primary" data-go="goro">ゴロ帳を開く</button>
+      <button class="btn ghost" data-go="goro/new">＋ゴロを書く</button></div></div>`;
+    h += `<h2>復習</h2><div class="card"><p class="ttl">今日の復習${due ? `<span class="badge">${due}問</span>` : ""}</p>
+      <div class="meta">間違えた問題が、忘れたころにもう一度出てきます(3つのタブ共通)。</div><div style="height:12px"></div>
+      <button class="btn primary" ${due ? `data-go="review"` : "disabled"}>${due ? "復習する" : "今日の復習はありません"}</button></div>`;
+    view.innerHTML = h;
+    bindGo();
+    document.getElementById("goal").onchange = (e) => { goal[ex.key] = e.target.value; saveAll(); home(); };
+  }
+  const bindGo = () => view.querySelectorAll("[data-go]").forEach(el => el.onclick = () => go(el.dataset.go));
+
+  // ---------- 法律(条の一覧) ----------
+  async function lawView(k) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    view.innerHTML = `<div class="card meta">読み込み中…</div>`;
+    const law = await loadLaw(k);
+    if (!law) { view.innerHTML = `<div class="card">この法律はまだ準備中です。</div>`; return; }
+    const arts = law.articles.filter(a => !a.deleted);
+    view.innerHTML = `<div class="card"><p class="ttl">${esc(law.title)}</p>
+      <div class="meta">${esc(law.num)} ／ ${arts.length}条 ／ 条文取得日 ${esc(law.fetched)}</div></div>
+      <div class="tools"><input type="search" id="q" placeholder="条番号(例: 18)や言葉で探す">
+        <label><input type="checkbox" id="fp"> ただし書あり</label>
+        <label><input type="checkbox" id="fn"> 解説あり</label>
+        <label><input type="checkbox" id="ff"> 改正予定</label></div>
+      <div class="card" id="list"></div>`;
+    const list = document.getElementById("list");
+    const draw = () => {
+      const q = document.getElementById("q").value.trim();
+      const fp = document.getElementById("fp").checked, fn = document.getElementById("fn").checked;
+      const hit = arts.filter(a => {
+        if (fp && !a.proviso) return false;
+        const has = hasNote(`${k}:${a.num}`);
+        if (fn && !has) return false;
+        if (document.getElementById("ff").checked && !FUTURE[`${k}:${a.num}`]) return false;
+        if (!q) return true;
+        if (/^[0-9]+(の[0-9]+)?$/.test(q)) return a.num === q.replace("の", "_");
+        return (a.caption + a.paras.map(p => p.s.map(s => s.t).join("")).join("")).includes(q);
+      });
+      let last = "", h = "";
+      for (const a of hit.slice(0, 300)) {
+        const chap = a.path.join(" › ");
+        if (chap !== last) { h += `<div class="chap">${esc(chap)}</div>`; last = chap; }
+        const has = hasNote(`${k}:${a.num}`);
+        h += `<div class="row" data-go="art/${k}/${a.num}"><span>${esc(a.title)} <span class="meta">${esc(a.caption)}</span>
+          ${a.proviso ? `<span class="tag pv">ただし書</span>` : ""}${has ? `<span class="tag nt">解説</span>` : ""}${FUTURE[`${k}:${a.num}`] ? `<span class="tag fu">改正予定</span>` : ""}${bm.arts.includes(`${k}:${a.num}`) ? ` <span style="color:#e8b800">★</span>` : ""}</span><span class="r">›</span></div>`;
+      }
+      if (hit.length > 300) h += `<p class="meta">ほか ${hit.length - 300}条。検索でしぼりこんでください。</p>`;
+      list.innerHTML = h || `<p class="meta">見つかりませんでした。</p>`;
+      list.querySelectorAll("[data-go]").forEach(el => el.onclick = () => go(el.dataset.go));
+    };
+    ["q", "fp", "fn", "ff"].forEach(id => document.getElementById(id).addEventListener("input", draw));
+    draw();
+  }
+
+  // ---------- 条文1つ(本文・ただし書・解説・関連条文・問題) ----------
+  function sentHtml(ss) {
+    return ss.map(s => s.kind === "proviso" ? `<span class="proviso">${esc(s.t)}</span>` : esc(s.t)).join("");
+  }
+  function itemsHtml(items) {
+    if (!items || !items.length) return "";
+    return `<ul class="items">${items.map(it => `<li><span class="in">${esc(it.n)}</span>${sentHtml(it.s)}${itemsHtml(it.items)}</li>`).join("")}</ul>`;
+  }
+  // ---------- 図(解説データの figures から描く。画像ファイルは使わない) ----------
+  // type: flow(流れ図) / timeline(期間) / compare(比較表)。at: summary / paras / proviso / related / traps
+  function figs(note, at) {
+    return (note.figures || []).filter(f => f.at === at).map(f => {
+      const body = f.type === "flow" ? figFlow(f) : f.type === "timeline" ? figTimeline(f) : f.type === "compare" ? figCompare(f) : f.type === "graph" ? figGraph(f) : f.type === "decision" ? figDecision(f) : "";
+      return `<figure class="fig"><figcaption>${esc(f.title)}</figcaption>${body}${f.note ? `<p class="fig-note">${esc(f.note)}</p>` : ""}</figure>`;
+    }).join("");
+  }
+  function figFlow(f) {
+    return `<div class="flow">${f.steps.map((s, i) => `
+      ${i ? `<div class="flow-arrow"><span>${esc((f.links || [])[i - 1] || "")}</span></div>` : ""}
+      <div class="flow-step ${s.hl ? "hl" : ""}"><b>${esc(s.label)}</b>${s.sub ? `<span>${esc(s.sub)}</span>` : ""}</div>`).join("")}</div>`;
+  }
+  function figTimeline(f) {
+    const W = 360, X = (v) => 14 + v * (W - 28), rows = Math.max(...f.spans.map(s => s.row || 0)) + 1;
+    const top = 8, rowH = 44, axisY = top + rows * rowH + 6;
+    let svg = "";
+    f.spans.forEach(s => {
+      const y = top + (s.row || 0) * rowH, x1 = X(s.from), x2 = X(s.to);
+      svg += `<rect x="${x1}" y="${y + 16}" width="${x2 - x1}" height="18" rx="5" class="${s.hl ? "tl-hl" : "tl-bar"}"/>
+        <text x="${x1 + 2}" y="${y + 11}" class="tl-span">${esc(s.label)}</text>`;
+    });
+    svg += `<line x1="${X(0) - 6}" y1="${axisY}" x2="${X(1) + 8}" y2="${axisY}" class="tl-axis"/>`;
+    f.points.forEach(p => {
+      const x = X(p.x), anchor = p.x < 0.15 ? "start" : p.x > 0.85 ? "end" : "middle", ly = axisY + 20 + (p.row || 0) * 17;
+      svg += `<line x1="${x}" y1="${axisY - 6}" x2="${x}" y2="${axisY + 6}" class="tl-axis"/>
+        ${p.row ? `<line x1="${x}" y1="${axisY + 6}" x2="${x}" y2="${ly - 11}" class="tl-guide"/>` : ""}
+        <text x="${x}" y="${ly}" text-anchor="${anchor}" class="tl-pt ${p.hl ? "hl" : ""}">${esc(p.label)}</text>`;
+    });
+    const H = axisY + 24 + Math.max(...f.points.map(p => p.row || 0)) * 17 + 6;
+    return `<svg viewBox="0 0 ${W} ${H}" class="tl" role="img" aria-label="${esc(f.title)}">${svg}</svg>`;
+  }
+  // 関係図: nodes [{id, label, sub, x, y, kind: "person" | "thing", hl}] edges [{from, to, label, kind: "money" | "right" | "hl", both}]
+  // 座標は 横360 の中での中心位置
+  function figGraph(f) {
+    const W = 360, NW = 112, NH = 44;
+    const H = Math.max(...f.nodes.map(n => n.y)) + NH / 2 + 10;
+    const pos = Object.fromEntries(f.nodes.map(n => [n.id, n]));
+    // 長い文字は四角の幅に収まるように縮める(全角1文字 ≒ 文字サイズ分の幅)
+    const fit = (t, size) => { const w = [...t].reduce((a, c) => a + (/[ -~]/.test(c) ? size * 0.55 : size), 0); return w > NW - 10 ? `textLength="${NW - 10}" lengthAdjust="spacingAndGlyphs"` : ""; };
+    const edge = (a, b) => { // 四角のふちから、ふちへ
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const t = (n) => Math.min((NW / 2 + 4) / Math.abs(dx || 1e-9), (NH / 2 + 4) / Math.abs(dy || 1e-9));
+      return [a.x + dx * t(a), a.y + dy * t(a), b.x - dx * t(b), b.y - dy * t(b)];
+    };
+    let svg = `<defs>${["e", "hl"].map(k => `<marker id="ar-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="gm-${k}"/></marker>`).join("")}</defs>`;
+    f.edges.forEach(e => {
+      const [x1, y1, x2, y2] = edge(pos[e.from], pos[e.to]);
+      const k = e.kind === "hl" ? "hl" : "e";
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ge ge-${e.kind || "money"}" marker-end="url(#ar-${k})" ${e.both ? `marker-start="url(#ar-${k})"` : ""}/>`;
+      if (e.label) {
+        const mx = (x1 + x2) / 2 + (e.dx || 0), my = (y1 + y2) / 2 + (e.dy || 0);
+        svg += `<text x="${mx}" y="${my + 4}" text-anchor="middle" class="gl ${e.kind === "hl" ? "hl" : ""}">${esc(e.label)}</text>`;
+      }
+    });
+    f.nodes.forEach(n => {
+      svg += `<g class="gn gn-${n.kind || "person"} ${n.hl ? "hl" : ""}"><rect x="${n.x - NW / 2}" y="${n.y - NH / 2}" width="${NW}" height="${NH}" rx="${n.kind === "thing" ? 3 : 10}"/>
+        <text x="${n.x}" y="${n.y + (n.sub ? -2 : 5)}" text-anchor="middle" class="gt" ${fit(n.label, 14.5)}>${esc(n.label)}</text>
+        ${n.sub ? `<text x="${n.x}" y="${n.y + 14}" text-anchor="middle" class="gs" ${fit(n.sub, 11.5)}>${esc(n.sub)}</text>` : ""}</g>`;
+    });
+    return `<svg viewBox="0 0 ${W} ${H}" class="tl" role="img" aria-label="${esc(f.title)}">${svg}</svg>`;
+  }
+  // 判断チャート: steps [{q, yes, no, via}]。次の質問へ進む矢印のラベルは via(省略時「いいえ」)
+  function figDecision(f) {
+    return `<div class="dec">${f.steps.map((st, i) => `
+      ${i ? `<div class="flow-arrow"><span>${esc(f.steps[i - 1].via || "いいえ")}</span></div>` : ""}
+      <div class="dec-q">${esc(st.q)}</div>
+      <div class="dec-a"><div class="dec-yes"><small>はい</small>${esc(st.yes)}</div>${st.no ? `<div class="dec-no"><small>いいえ</small>${esc(st.no)}</div>` : ""}</div>`).join("")}</div>`;
+  }
+  function figCompare(f) {
+    if (f.head.length >= 4) { // 列が多い表は、スマホで読みやすいようにカードで出す
+      return `<div class="cmp-cards">${f.rows.map((r, i) => `<div class="cmp-card ${(f.hlRows || []).includes(i) ? "hl" : ""}">
+        <b>${esc(r[0])}</b>${r.slice(1).map((c, j) => `<div><span>${esc(f.head[j + 1])}</span>${esc(c)}</div>`).join("")}</div>`).join("")}</div>`;
+    }
+    return `<div class="cmp-wrap"><table class="cmp"><thead><tr>${f.head.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+      <tbody>${f.rows.map((r, i) => `<tr class="${(f.hlRows || []).includes(i) ? "hl" : ""}">${r.map((c, j) => j ? `<td>${esc(c)}</td>` : `<th>${esc(c)}</th>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  // 解説本体(条文の解説・テーマ解説で共通)
+  function noteHtml(note) {
+    return `<div class="card sec">${note.status === "draft" ? `<div class="draft">下書き:チェック部門の確認前です</div>` : ""}${note.covers ? `<div class="warn" style="margin:0 0 10px">この解説は${esc(note.covers)}をまとめて説明しています。</div>` : ""}
+        <h3>ひとことで</h3><p>${esc(note.summary)}</p>${figs(note, "summary")}
+        ${note.terms && note.terms.length ? `<h3>まず用語</h3>${note.terms.map(t => `<div class="term"><b>${esc(t.word)}</b><p>${esc(t.body)}</p>${t.fig ? figs({ figures: [{ ...t.fig, at: "x" }] }, "x") : ""}</div>`).join("")}${figs(note, "terms")}` : ""}
+        ${note.why ? `<h3>なぜこのルールがあるの?</h3><p>${esc(note.why)}</p>${figs(note, "why")}` : ""}
+        ${note.story ? `<h3>具体例で見る</h3><p class="meta">${esc(note.story.title)}</p><ol class="story">${note.story.steps.map(st => `<li><b>${esc(st.t)}</b><span>${esc(st.body)}</span></li>`).join("")}</ol>${figs(note, "story")}` : ""}
+        ${note.paras && note.paras.length ? `<h3>項ごとの解説</h3>${note.paras.map(p => `<p><b>第${esc(p.n)}項 ${esc(p.head)}</b><br>${esc(p.body)}</p>`).join("")}` : ""}
+        ${note.points && note.points.length ? `<h3>ポイント</h3>${note.points.map(p => `<p><b>${esc(p.head)}</b><br>${esc(p.body)}</p>`).join("")}` : ""}${figs(note, "paras")}
+        ${note.proviso && note.proviso.length ? `<h3>ただし書</h3>${note.proviso.map(p => `<div class="pv-box"><div class="meta">${/^[0-9・]+$/.test(p.para) ? `第${esc(p.para)}項` : esc(p.para)}「${esc(p.text)}」</div><p style="margin:6px 0 0">${esc(p.body)}</p></div>`).join("")}${figs(note, "proviso")}` : ""}
+        ${note.related && note.related.length ? `<h3>関連する条文・テーマ</h3>${note.related.map(r => {
+          const [rk, rn] = r.ref.split(":");
+          return `<a class="rel" href="${rk === "topic" ? `#/topic/${rn}` : `#/art/${rk}/${rn}`}"><b>${esc(r.label)}</b><br><span class="meta">${esc(r.body)}</span></a>`;
+        }).join("")}${figs(note, "related")}` : ""}
+        ${note.traps && note.traps.length ? `<h3 style="margin-top:14px">ひっかけ注意</h3>${figs(note, "traps")}<ul class="traps">${note.traps.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+        <h3 style="margin-top:14px">過去問</h3>
+        ${(note.kakomon || []).length ? `<ul class="traps">${note.kakomon.map(x => `<li>${esc(x.exam)} ${esc(x.year)} 問${esc(x.no)}${x.memo ? `(${esc(x.memo)})` : ""}</li>`).join("")}</ul>` : `<p class="meta">まだ紐づけていません。</p>`}
+        <p class="meta">※過去問の問題文は、試験実施団体の許諾を得てから掲載します。問題は各団体の公式サイトで確認できます。</p>
+        <div class="src">解説の確認日: ${esc(note.checked)}</div></div>`;
+  }
+  // ---------- テーマ解説(条文に紐づかない分野: 基礎法学・行政法総論・一般知識など) ----------
+  function topicView(id) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    const t = (window.TOPICS || {})[id];
+    if (!t) { view.innerHTML = `<div class="card">テーマが見つかりませんでした。</div>`; return; }
+    view.innerHTML = `<div class="card"><div class="meta">テーマ解説 ／ ${esc(t.subjects.join("・"))}</div><p class="art-head" style="font-size:20px">${esc(t.title)}</p></div>
+      ${noteHtml(t)}${t.questions && t.questions.length ? `<button class="btn primary" id="artQuiz">このテーマの問題を解く(${t.questions.length}問)</button>` : ""}`;
+    const b = document.getElementById("artQuiz");
+    if (b) b.onclick = () => quiz(t.questions.map(q => ({ ...q, src: t.title, checked: t.checked })), t.title);
+  }
+
+  async function articleView(k, num) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    view.innerHTML = `<div class="card meta">読み込み中…</div>`;
+    const law = await loadLaw(k);
+    const a = law && law.articles.find(x => x.num === num);
+    if (!a) { view.innerHTML = `<div class="card">条文が見つかりませんでした。</div>`; return; }
+    const note = noteFor(`${k}:${num}`);
+    const bs0 = BASIS[`${k}:${num}`];
+    if (bs0) await Promise.all([...new Set(Object.keys(bs0.hashes).map(r => r.split(":")[0]))].map(loadLaw)); // 根拠の法律も読んで比べる
+    let h = `<div class="card"><div class="meta">${esc(law.title)} ／ ${esc(a.path.join(" › "))}</div>
+      <div class="count"><p class="art-head">${esc(a.title)}</p><button class="star ${bm.arts.includes(`${k}:${num}`) ? "on" : ""}" id="artStar" aria-label="ブックマーク">★</button></div>
+      <p class="art-cap">${esc(a.caption)}</p>
+      ${(FUTURE[`${k}:${num}`] || []).map(f => `<div class="warn">${esc(f.date)} 施行予定の改正「${esc(f.law)}」で、この条は${esc(f.kind)}されます。下の条文は今の版です。</div>`).join("")}
+      ${a.paras.map((p, i) => `<div class="para"><span class="pn">${a.paras.length > 1 ? esc(String(i + 1)) : ""}</span><div>${sentHtml(p.s)}${itemsHtml(p.items)}</div></div>`).join("")}
+      ${a.proviso ? `<div class="legend"><span class="proviso">マーカー</span> = ただし書</div>` : ""}
+      <div class="src" style="margin-top:8px">出典: e-Gov法令検索 ／ 取得日 ${esc(law.fetched)}</div></div>`;
+    if (note) {
+      h += noteHtml(note);
+      const bs = BASIS[`${k}:${num}`];
+      const changed = bs ? Object.entries(bs.hashes).filter(([ref, hv]) => { const [lk, ln] = ref.split(":"); const la = (window.LAWDATA || {})[lk]; const x = la && la.articles.find(y => y.num === ln); return la && (!x || x.h !== hv); }) : [];
+      if (changed.length) h = h.replace(`<div class="card sec">`, `<div class="card sec"><div class="warn red">確認したあとに条文が変わっています(${esc(changed.map(c => c[0]).join(", "))})。解説と答えを確認中です。</div>`);
+      if (note.questions && note.questions.length) h += `<button class="btn primary" id="artQuiz">この条文の問題を解く(${note.questions.length}問)</button>`;
+    } else {
+      h += `<div class="card meta">この条文の解説は準備中です。</div>`;
+    }
+    const myGoro = goro.filter(g => g.ref === `${k}:${num}`);
+    h += `<div class="card"><p class="ttl">この条文のゴロ${myGoro.length ? `<span class="badge">${myGoro.length}件</span>` : ""}</p>
+      ${myGoro.map(g => `<div class="goro-item"><b>${esc(g.text)}</b>${g.meaning ? `<p>${esc(g.meaning)}</p>` : ""}</div>`).join("")}
+      <button class="btn ghost" data-go="goro/new/${encodeURIComponent(`${k}:${num}`)}" style="margin-top:8px">＋この条文のゴロを書く</button></div>`;
+    view.innerHTML = h;
+    bindGo();
+    document.getElementById("artStar").onclick = (e) => e.target.classList.toggle("on", toggleBm("arts", `${k}:${num}`));
+    const b = document.getElementById("artQuiz");
+    if (b) b.onclick = () => quiz(note.questions.map(q => ({ ...q, src: `${law.title} ${a.title}`, checked: note.checked })), `${law.title} ${a.title}`);
+  }
+
+  // ---------- ゴロ帳(自分で考えた語呂合わせ。この端末の中だけに保存) ----------
+  const refLabel = (ref) => {
+    if (!ref) return "";
+    const [k, num] = ref.split(":");
+    const name = (window.LAW_NAMES || {})[k] || k;
+    return `${name} ${num.replace(/_/g, "条の")}条`;
+  };
+  function goroView(mode, arg) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    if (mode === "new" || mode === "edit") return goroForm(mode === "edit" ? goro.find(g => g.id === arg) : null, mode === "new" ? arg || "" : "");
+    if (mode === "card") return goroCards();
+    const q = (sessionStorage.getItem("goroQ") || "");
+    const list = goro.filter(g => !q || (g.text + g.meaning + refLabel(g.ref)).includes(q)).sort((x, y) => y.updated - x.updated);
+    view.innerHTML = `<div class="card"><p class="ttl">ゴロ帳<span class="badge">${goro.length}件</span></p>
+        <div class="meta">自分で考えた覚え方をためておくノート。記録はこの端末の中だけに保存されます。</div>
+        <div class="modes" style="grid-template-columns:1fr 1fr;margin-top:12px"><button class="btn primary" data-go="goro/new">＋ゴロを書く</button>
+        <button class="btn ghost" ${goro.length ? `data-go="goro/card"` : "disabled"}>暗記カードで確認</button></div>
+        <input type="search" id="goroQ" class="fusen-input" placeholder="ゴロ・内容・条文で探す" value="${esc(q)}" style="margin-top:12px"></div>
+      ${list.length ? list.map(g => `<div class="card goro-item">
+          <b>${esc(g.text)}</b>${g.meaning ? `<p>${esc(g.meaning)}</p>` : ""}
+          <div class="goro-foot">${g.ref ? `<button class="link" data-go="art/${esc(g.ref.split(":")[0])}/${esc(g.ref.split(":")[1])}">${esc(refLabel(g.ref))}</button>` : `<span></span>`}
+          <button class="link" data-go="goro/edit/${esc(g.id)}">編集</button></div></div>`).join("")
+        : `<div class="card meta">${goro.length ? "見つかりませんでした。" : "まだゴロがありません。条文の画面の「＋この条文のゴロを書く」からも追加できます。"}</div>`}`;
+    bindGo();
+    const box = document.getElementById("goroQ");
+    box.onchange = () => { sessionStorage.setItem("goroQ", box.value.trim()); goroView(); };
+  }
+  function goroForm(g, ref) {
+    const r = g ? g.ref || "" : ref;
+    view.innerHTML = `<div class="card"><p class="ttl">${g ? "ゴロを直す" : "ゴロを書く"}</p>
+        ${r ? `<div class="meta">関連する条文: ${esc(refLabel(r))}</div>` : ""}
+        <label class="meta" for="gText" style="display:block;margin-top:12px">ゴロ(語呂合わせ・覚え方)</label>
+        <textarea id="gText" class="kj" rows="2" placeholder="例: 取消しは「いつかご(5)にじゅう(20)」→ 5年・20年">${esc(g ? g.text : "")}</textarea>
+        <label class="meta" for="gMean" style="display:block;margin-top:10px">覚える内容(カードの裏)</label>
+        <textarea id="gMean" class="kj" rows="3" placeholder="例: 取消権は追認できる時から5年、行為の時から20年で消滅(民法126条)">${esc(g ? g.meaning : "")}</textarea>
+        <button class="btn primary" id="gSave" style="margin-top:14px">保存する</button>
+        ${g ? `<button class="btn ghost" id="gDel" style="margin-top:8px">このゴロを削除する</button>` : ""}</div>`;
+    document.getElementById("gSave").onclick = () => {
+      const text = document.getElementById("gText").value.trim(), meaning = document.getElementById("gMean").value.trim();
+      if (!text) { document.getElementById("gText").focus(); return; }
+      const now = Date.now();
+      if (g) Object.assign(g, { text, meaning, updated: now });
+      else goro.push({ id: "g" + now.toString(36), text, meaning, ref: r, created: now, updated: now });
+      saveGoro();
+      r ? go(`art/${r.split(":")[0]}/${r.split(":")[1]}`) : go("goro");
+    };
+    const del = document.getElementById("gDel");
+    if (del) del.onclick = () => { if (confirm("このゴロを削除します。元に戻せません。よろしいですか?")) { goro = goro.filter(x => x.id !== g.id); saveGoro(); go("goro"); } };
+  }
+  function goroCards() {
+    const deck = goro.slice().sort(() => Math.random() - 0.5);
+    let i = 0, open = false;
+    const draw = () => {
+      if (i >= deck.length) { view.innerHTML = `<div class="card"><p class="ttl">おつかれさま!</p><div class="meta">${deck.length}枚を確認しました。</div></div><button class="btn primary" id="gAgain">もう一度</button><button class="btn ghost" data-go="goro" style="margin-top:8px">ゴロ帳にもどる</button>`; bindGo(); document.getElementById("gAgain").onclick = goroCards; return; }
+      const g = deck[i];
+      view.innerHTML = `<div class="card"><div class="qno count"><span>暗記カード ／ ${i + 1} / ${deck.length}</span>${g.ref ? `<span class="meta">${esc(refLabel(g.ref))}</span>` : ""}</div>
+          <p class="goro-big">${esc(g.text)}</p>
+          ${open ? `<div class="goro-back">${esc(g.meaning || "(内容は未記入)")}</div>` : ""}</div>
+        <button class="btn primary" id="gFlip">${open ? (i + 1 < deck.length ? "次へ" : "おわる") : "内容を見る"}</button>`;
+      document.getElementById("gFlip").onclick = () => { if (open) { i++; open = false; } else open = true; draw(); };
+    };
+    draw();
+  }
+
+  // ---------- 記録(マイページ) ----------
+  function meView() {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    const qs = allQuestions();
+    const tried = qs.filter(q => store[q.id]);
+    const tries = tried.reduce((n, q) => n + store[q.id].tries, 0);
+    const correct = tried.reduce((n, q) => n + store[q.id].correct, 0);
+    const weak = tried.filter(q => store[q.id].tries > store[q.id].correct)
+      .sort((x, y) => (store[x.id].correct / store[x.id].tries) - (store[y.id].correct / store[y.id].tries)).slice(0, 10);
+    const days = Array.from({ length: 14 }, (_, i) => ymd(today() - (13 - i) * DAY));
+    const max = Math.max(1, ...days.map(d => log[d] || 0));
+    view.innerHTML = `<div class="card"><div class="stats">
+        <div><b>${streak()}</b><span>連続日数</span></div>
+        <div><b>${tries}</b><span>解いた回数</span></div>
+        <div><b>${tries ? Math.round(correct / tries * 100) : 0}%</b><span>正答率</span></div></div>
+        <div style="display:flex;gap:4px;align-items:flex-end;height:60px;margin-top:16px">${days.map(d => `<div title="${d}: ${log[d] || 0}問" style="flex:1;background:${log[d] ? "var(--ink)" : "var(--line)"};height:${Math.max(4, (log[d] || 0) / max * 60)}px;border-radius:3px"></div>`).join("")}</div>
+        <div class="meta" style="display:flex;justify-content:space-between"><span>2週間前</span><span>今日</span></div></div>
+      <h2>出題モード</h2><div class="modes">
+        <button class="btn primary" data-go="mode/wrong">間違えた問題</button>
+        <button class="btn primary" data-go="mode/star">付箋の問題</button>
+        <button class="btn primary" data-go="mode/random">ランダム10問</button></div>
+      <h2>苦手な問題</h2><div class="card">${weak.length ? weak.map(q => `<div class="row" style="cursor:default"><span>${esc(q.q)}<br><span class="meta">${esc(q.from)}</span></span><span class="r">${store[q.id].correct}/${store[q.id].tries}</span></div>`).join("") : `<p class="meta">まだありません。</p>`}</div>
+      <h2>★の条文</h2><div class="card">${bm.arts.length ? bm.arts.map(id => { const [lk, ln] = id.split(":"); return `<div class="row" data-go="art/${lk}/${ln}"><span>${esc(LAW_NAMES[lk])} ${esc(ln.replace("_", "条の"))}条</span><span class="r">›</span></div>`; }).join("") : `<p class="meta">条文の★を押すとここに集まります。</p>`}</div>`;
+    bindGo();
+  }
+  function modeQuiz(m) {
+    const qs = allQuestions();
+    const shuffle = (a) => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+    if (m === "wrong") return quiz(qs.filter(q => store[q.id] && store[q.id].tries > store[q.id].correct), "間違えた問題");
+    if (m === "star") return quiz(qs.filter(q => bm.qs.includes(q.id)), "付箋の問題");
+    const TN = { ox: "○×", choice: "5肢択一", tashi: "多肢選択", kijutsu: "記述式" };
+    if (TN[m]) return quiz(shuffle(qs.filter(q => (q.type || "ox") === m)), TN[m] + "の問題");
+    return quiz(shuffle(qs).slice(0, 10), "ランダム10問");
+  }
+
+  // ---------- 問題 ----------
+  function startLesson(id) {
+    const l = LESSONS.find(x => x.id === id);
+    if (!l) return home();
+    quiz(l.questions, l.title);
+  }
+  function quiz(qs, title) {
+    backBtn.classList.remove("hidden"); renderTabs(false);
+    if (!qs.length) { view.innerHTML = `<div class="card meta">対象の問題がありません。</div>`; return; }
+    let i = 0; const wrong = [];
+    // 問題の形式: ox(○×・省略時) / choice(5肢択一) / tashi(多肢選択) / kijutsu(記述式)
+    const TYPE_NAME = { ox: "○×", choice: "5肢択一", tashi: "多肢選択", kijutsu: "記述式" };
+    const show = () => {
+      const q = qs[i], t = q.type || "ox";
+      let body = "";
+      if (t === "ox") body = `<p class="qtext">${esc(q.q)}</p>
+        <div class="ox"><button data-a="1" aria-label="まる">○</button><button data-a="0" aria-label="ばつ">×</button></div>`;
+      if (t === "choice") body = `<p class="qtext">${esc(q.q)}</p>
+        <div class="choices">${q.options.map((o, j) => `<button data-c="${j}"><span>${j + 1}</span>${esc(o)}</button>`).join("")}</div>`;
+      if (t === "tashi") body = `<p class="meta">空欄に入る語句を、下の語群から選んでください。</p>
+        <p class="qtext tashi-text">${esc(q.text).replace(/\[(.)\]/g, (_, k) => `<span class="blank" data-k="${k}">${k}</span>`)}</p>
+        <div class="blank-sel">${Object.keys(q.answers).map(k => `<label><b>${k}</b><select data-k="${k}"><option value="">選ぶ</option>${q.choices.map((c, j) => `<option value="${j}">${j + 1}. ${esc(c)}</option>`).join("")}</select></label>`).join("")}</div>
+        <button class="btn primary" id="tashiGo" style="margin-top:12px">答え合わせ</button>`;
+      if (t === "kijutsu") body = `<p class="qtext">${esc(q.q)}</p>
+        <textarea id="kj" class="kj" rows="3" placeholder="${q.limit || 45}字程度で書く"></textarea>
+        <div class="kj-count"><span id="kjn">0</span>字 ／ 目安 ${q.limit || 45}字程度</div>
+        <button class="btn primary" id="kjGo" style="margin-top:8px">模範解答を見る</button>`;
+      view.innerHTML = `<div class="card"><div class="qno count"><span>${esc(title)} ／ ${i + 1} / ${qs.length} <span class="tag soon">${TYPE_NAME[t]}</span></span><button class="fusen ${bm.qs.includes(q.id) ? "on" : ""}" id="qStar">${bm.qs.includes(q.id) ? "付箋あり" : "＋付箋"}</button></div>
+        ${bm.memo[q.id] ? `<div class="fusen-memo">付箋メモ: ${esc(bm.memo[q.id])}</div>` : ""}
+        <div class="bar" style="margin-top:0"><i style="width:${i / qs.length * 100}%"></i></div>
+        ${body}
+        <div id="res"></div></div>`;
+      if (t === "ox") view.querySelectorAll(".ox button").forEach(b => b.onclick = () => {
+        const a = b.dataset.a === "1";
+        view.querySelectorAll(".ox button").forEach(x => { x.disabled = true; const right = (x.dataset.a === "1") === q.a; x.style.borderColor = right ? "var(--ok)" : "var(--line)"; x.style.color = right ? "var(--ok)" : "var(--sub)"; });
+        answer(q, a === q.a, `答えは「${q.a ? "○" : "×"}」`);
+      });
+      if (t === "choice") view.querySelectorAll(".choices button").forEach(b => b.onclick = () => {
+        const c = +b.dataset.c;
+        view.querySelectorAll(".choices button").forEach(x => { x.disabled = true; if (+x.dataset.c === q.answer) x.classList.add("right"); else if (x === b) x.classList.add("miss"); });
+        answer(q, c === q.answer, `答えは「${q.answer + 1}」`);
+      });
+      if (t === "tashi") document.getElementById("tashiGo").onclick = (e) => {
+        e.target.remove();
+        let all = true;
+        view.querySelectorAll(".blank-sel select").forEach(sel => {
+          const k = sel.dataset.k, ok = sel.value !== "" && +sel.value === q.answers[k];
+          if (!ok) all = false;
+          sel.disabled = true; sel.parentElement.classList.add(ok ? "right" : "miss");
+          const span = view.querySelector(`.blank[data-k="${k}"]`);
+          span.textContent = `${k}: ${q.choices[q.answers[k]]}`; span.classList.add(ok ? "right" : "miss");
+        });
+        answer(q, all, `正しい組み合わせ: ${Object.entries(q.answers).map(([k, v]) => `${k}=${v + 1}`).join("、")}`);
+      };
+      if (t === "kijutsu") {
+        const kj = document.getElementById("kj"), n = document.getElementById("kjn");
+        const len = (x) => x.replace(/\s/g, "").length;
+        kj.oninput = () => { n.textContent = len(kj.value); n.parentElement.classList.toggle("over", len(kj.value) > (q.limit || 45)); };
+        document.getElementById("kjGo").onclick = (e) => {
+          e.target.remove(); kj.readOnly = true;
+          const mine = kj.value.replace(/\s/g, "");
+          const pts = q.points.map(p => ({ ...p, hit: p.words.some(w => mine.includes(w)) }));
+          const got = pts.filter(p => p.hit).reduce((a, p) => a + p.score, 0), full = pts.reduce((a, p) => a + p.score, 0);
+          document.getElementById("res").innerHTML = `<div class="result kj-res">
+            <div class="meta">模範解答(${len(q.model)}字)</div><p class="kj-model">${esc(q.model)}</p>
+            <div class="meta">採点ポイント(キーワードの自動チェック・目安)</div>
+            <ul class="kj-pts">${pts.map(p => `<li class="${p.hit ? "hit" : ""}">${p.hit ? "✓" : "・"} ${esc(p.label)}(${p.score}点)</li>`).join("")}</ul>
+            <p class="meta">自動チェックの目安: ${got} / ${full}点。言い回しが違っても意味が合っていればOK。最後は自分で判定してください。</p>
+            <p class="exp">${esc(q.exp)}</p></div>
+            <div class="self">自分の判定:<button data-s="2">書けた</button><button data-s="1">部分的</button><button data-s="0">書けなかった</button></div>`;
+          document.querySelectorAll(".self button").forEach(b => b.onclick = () => {
+            document.querySelector(".self").remove();
+            answer(q, b.dataset.s === "2", { 2: "判定: 書けた", 1: "判定: 部分的(復習に入れます)", 0: "判定: 書けなかった(復習に入れます)" }[b.dataset.s], true);
+          });
+        };
+      }
+      const fs = document.getElementById("qStar");
+      fs.onclick = () => { const on = toggleBm("qs", q.id); fs.classList.toggle("on", on); fs.textContent = on ? "付箋あり" : "＋付箋"; };
+    };
+    const answer = (q, ok, ansText, append) => {
+      record(q, ok);
+      if (!ok) wrong.push(q);
+      const res = document.getElementById("res");
+      const html = `${append ? "" : `<div class="result ${ok ? "ok" : "ng"}">
+        <b>${ok ? "正解!" : "ざんねん"}</b>　${esc(ansText)}
+        <p class="exp">${esc(q.exp)}</p>
+        <div class="src">根拠: ${esc(q.src)}<br>確認日: ${esc(q.checked)}</div></div>`}
+        ${append ? `<p class="meta" style="margin-top:10px">${esc(ansText)}</p><div class="src">根拠: ${esc(q.src)} ／ 確認日: ${esc(q.checked)}</div>` : ""}
+        <label class="fusen-row"><input type="checkbox" id="fsOn" ${bm.qs.includes(q.id) ? "checked" : ""}> 付箋をつける(あとで「付箋の問題」でまとめて解ける)</label>
+        <input type="text" id="fsMemo" class="fusen-input" placeholder="付箋メモ(例: 3か月と6か月を混同)" value="${esc(bm.memo[q.id] || "")}">
+        <button class="btn primary" id="next" style="margin-top:14px">${i + 1 < qs.length ? "次へ" : "結果を見る"}</button>`;
+      append ? res.insertAdjacentHTML("beforeend", html) : (res.innerHTML = html);
+      const on = document.getElementById("fsOn"), memo = document.getElementById("fsMemo");
+      on.onchange = () => { if (on.checked !== bm.qs.includes(q.id)) toggleBm("qs", q.id); };
+      memo.oninput = () => { if (memo.value.trim()) { bm.memo[q.id] = memo.value.trim(); if (!bm.qs.includes(q.id)) { toggleBm("qs", q.id); on.checked = true; } } else delete bm.memo[q.id]; saveAll(); };
+      document.getElementById("next").onclick = () => { i++; i < qs.length ? show() : finish(); };
+    };
+    const finish = () => {
+      const n = qs.length - wrong.length;
+      view.innerHTML = `<div class="card center"><div class="meta">${esc(title)}</div>
+        <p class="score">${n}<small> / ${qs.length}</small></p>
+        <p class="meta">${n === qs.length ? "全問正解!" : "間違えた問題は「今日の復習」に入りました。"}</p></div>
+        ${wrong.length ? `<div class="card"><p class="ttl">間違えた問題</p><ol class="wrong-list">${wrong.map(q => `<li>${esc(q.q || q.title || "")}<br><span class="meta">${!q.type || q.type === "ox" ? `答え: ${q.a ? "○" : "×"}` : esc({ choice: "5肢択一", tashi: "多肢選択", kijutsu: "記述式" }[q.type])}</span></li>`).join("")}</ol></div>` : ""}
+        ${wrong.length ? `<button class="btn primary" id="retryWrong">間違えた${wrong.length}問だけもう一度</button>` : ""}
+        <button class="btn ${wrong.length ? "ghost" : "primary"}" id="again">全部もう一度</button>
+        <button class="btn ghost" id="back">もどる</button>`;
+      document.getElementById("again").onclick = () => quiz(qs, title);
+      if (wrong.length) document.getElementById("retryWrong").onclick = () => quiz(wrong.slice(), title + "(間違えた問題)");
+      document.getElementById("back").onclick = () => history.back();
+    };
+    show();
+  }
+
+  loadNotes().then(route);
+})();
+</script>
+</body>
+</html>
