@@ -92,6 +92,8 @@
   .fusen.on { background: #ffe066; color: #5a4600; }
   .fusen-memo { font-size: 13px; background: #fff6c8; border-left: 4px solid #e8b800; padding: 6px 10px; border-radius: 4px; margin: -4px 0 10px; }
   .fusen-row { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--sub); margin-top: 12px; }
+  .stmts { background: #f6f3ec; border-radius: 10px; padding: 8px 12px; margin: 0 0 12px; }
+  .stmts p { margin: 6px 0; font-size: 15px; line-height: 1.7; }
   .checked { background: #e6f4ea; color: #1e6b34; border-radius: 8px; padding: 6px 10px; font-size: 13px; margin-bottom: 10px; }
   .goro-item b { display: block; font-size: 16px; }
   .goro-item p { margin: 6px 0 0; color: var(--sub); font-size: 14px; white-space: pre-wrap; }
@@ -271,6 +273,10 @@
       (n.questions || []).forEach(q => qs.push({ ...q, from: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, src: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, checked: n.checked }));
     }
     for (const [id, t] of Object.entries(window.TOPICS || {})) (t.questions || []).forEach(q => qs.push({ ...q, from: t.title, src: t.title, checked: t.checked }));
+    for (const [k, arr] of Object.entries(window.EXAMQ || {})) {
+      const [law, num] = k.split(":");
+      arr.forEach(q => qs.push({ ...q, level: "exam", from: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条`, src: `${LAW_NAMES[law]} ${num.replace("_", "条の")}条` }));
+    }
     const seen = new Set();
     return qs.filter(q => !seen.has(q.id) && seen.add(q.id));
   }
@@ -348,6 +354,10 @@
     const fusenN = allQuestions().filter(q => bm.qs.includes(q.id)).length;
     const byType = (t) => allQuestions().filter(q => (q.type || "ox") === t).length;
     h += `<h2>形式別に解く</h2><div class="modes" style="grid-template-columns:repeat(4,1fr)">${[["ox", "○×"], ["choice", "択一"], ["tashi", "多肢選択"], ["kijutsu", "記述式"]].map(([t, n]) => `<button class="btn primary" ${byType(t) ? `data-go="mode/${t}"` : "disabled"}>${n}<br><small>${byType(t)}問</small></button>`).join("")}</div>`;
+    const examN = allQuestions().filter(q => q.level === "exam").length;
+    h += `<h2>本試験レベル</h2><div class="card"><p class="ttl">本試験と同じ形の問題${examN ? `<span class="badge">${examN}問</span>` : ""}</p>
+      <div class="meta">5肢択一・ア〜オの組み合わせ・事例問題など、判例や条文の細かいところまで問う問題です。</div><div style="height:12px"></div>
+      <button class="btn primary" ${examN ? `data-go="mode/exam"` : "disabled"}>本試験レベルを解く</button></div>`;
     h += `<h2>苦手つぶし</h2><div class="modes" style="grid-template-columns:1fr 1fr">
       <button class="btn primary" ${wrongN ? `data-go="mode/wrong"` : "disabled"}>間違えた問題<br><small>${wrongN}問</small></button>
       <button class="btn primary" ${fusenN ? `data-go="mode/star"` : "disabled"}>付箋の問題<br><small>${fusenN}問</small></button></div>`;
@@ -533,6 +543,8 @@
     const a = law && law.articles.find(x => x.num === num);
     if (!a) { view.innerHTML = `<div class="card">条文が見つかりませんでした。</div>`; return; }
     const note = noteFor(`${k}:${num}`);
+    const EQ = window.EXAMQ || {};
+    const examQs = EQ[`${k}:${num}`] || EQ[(window.NOTE_ALIAS || {})[`${k}:${num}`]] || [];
     const bs0 = BASIS[`${k}:${num}`];
     if (bs0) await Promise.all([...new Set(Object.keys(bs0.hashes).map(r => r.split(":")[0]))].map(loadLaw)); // 根拠の法律も読んで比べる
     let h = `<div class="card"><div class="meta">${esc(law.title)} ／ ${esc(a.path.join(" › "))}</div>
@@ -548,6 +560,7 @@
       const changed = bs ? Object.entries(bs.hashes).filter(([ref, hv]) => { const [lk, ln] = ref.split(":"); const la = (window.LAWDATA || {})[lk]; const x = la && la.articles.find(y => y.num === ln); return la && (!x || x.h !== hv); }) : [];
       if (changed.length) h = h.replace(`<div class="card sec">`, `<div class="card sec"><div class="warn red">確認したあとに条文が変わっています(${esc(changed.map(c => c[0]).join(", "))})。解説と答えを確認中です。</div>`);
       if (note.questions && note.questions.length) h += `<button class="btn primary" id="artQuiz">この条文の問題を解く(${note.questions.length}問)</button>`;
+      if (examQs.length) h += `<button class="btn primary" id="artExam" style="margin-top:8px">本試験レベルの問題(${examQs.length}問)</button>`;
     } else {
       h += `<div class="card meta">この条文の解説は準備中です。</div>`;
     }
@@ -560,6 +573,8 @@
     document.getElementById("artStar").onclick = (e) => e.target.classList.toggle("on", toggleBm("arts", `${k}:${num}`));
     const b = document.getElementById("artQuiz");
     if (b) b.onclick = () => quiz(note.questions.map(q => ({ ...q, src: `${law.title} ${a.title}`, checked: note.checked })), `${law.title} ${a.title}`);
+    const be = document.getElementById("artExam");
+    if (be) be.onclick = () => quiz(examQs.map(q => ({ ...q, level: "exam", src: `${law.title} ${a.title}` })), `${law.title} ${a.title}(本試験レベル)`);
   }
 
   // ---------- ゴロ帳(自分で考えた語呂合わせ。この端末の中だけに保存) ----------
@@ -656,6 +671,7 @@
     const shuffle = (a) => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
     if (m === "wrong") return quiz(qs.filter(q => store[q.id] && store[q.id].tries > store[q.id].correct), "間違えた問題");
     if (m === "star") return quiz(qs.filter(q => bm.qs.includes(q.id)), "付箋の問題");
+    if (m === "exam") return quiz(shuffle(qs.filter(q => q.level === "exam")), "本試験レベル");
     const TN = { ox: "○×", choice: "5肢択一", tashi: "多肢選択", kijutsu: "記述式" };
     if (TN[m]) return quiz(shuffle(qs.filter(q => (q.type || "ox") === m)), TN[m] + "の問題");
     return quiz(shuffle(qs).slice(0, 10), "ランダム10問");
@@ -679,6 +695,7 @@
       if (t === "ox") body = `<p class="qtext">${esc(q.q)}</p>
         <div class="ox"><button data-a="1" aria-label="まる">○</button><button data-a="0" aria-label="ばつ">×</button></div>`;
       if (t === "choice") body = `<p class="qtext">${esc(q.q)}</p>
+        ${q.stmts ? `<div class="stmts">${q.stmts.map(x => `<p>${esc(x)}</p>`).join("")}</div>` : ""}
         <div class="choices">${q.options.map((o, j) => `<button data-c="${j}"><span>${j + 1}</span>${esc(o)}</button>`).join("")}</div>`;
       if (t === "tashi") body = `<p class="meta">空欄に入る語句を、下の語群から選んでください。</p>
         <p class="qtext tashi-text">${esc(q.text).replace(/\[(.)\]/g, (_, k) => `<span class="blank" data-k="${k}">${k}</span>`)}</p>
@@ -688,7 +705,7 @@
         <textarea id="kj" class="kj" rows="3" placeholder="${q.limit || 45}字程度で書く"></textarea>
         <div class="kj-count"><span id="kjn">0</span>字 ／ 目安 ${q.limit || 45}字程度</div>
         <button class="btn primary" id="kjGo" style="margin-top:8px">模範解答を見る</button>`;
-      view.innerHTML = `<div class="card"><div class="qno count"><span>${esc(title)} ／ ${i + 1} / ${qs.length} <span class="tag soon">${TYPE_NAME[t]}</span></span><button class="fusen ${bm.qs.includes(q.id) ? "on" : ""}" id="qStar">${bm.qs.includes(q.id) ? "付箋あり" : "＋付箋"}</button></div>
+      view.innerHTML = `<div class="card"><div class="qno count"><span>${esc(title)} ／ ${i + 1} / ${qs.length} <span class="tag soon">${TYPE_NAME[t]}</span>${q.level === "exam" ? `<span class="tag nt">本試験レベル</span>` : ""}</span><button class="fusen ${bm.qs.includes(q.id) ? "on" : ""}" id="qStar">${bm.qs.includes(q.id) ? "付箋あり" : "＋付箋"}</button></div>
         ${bm.memo[q.id] ? `<div class="fusen-memo">付箋メモ: ${esc(bm.memo[q.id])}</div>` : ""}
         <div class="bar" style="margin-top:0"><i style="width:${i / qs.length * 100}%"></i></div>
         ${body}
